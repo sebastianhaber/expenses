@@ -7,6 +7,8 @@
     "start": "react-native start"
   },
   "dependencies": {
+    "color": "^4.0.1",
+    "deepmerge": "^4.2.2",
     "expo": "~42.0.1",
     "expo-splash-screen": "~0.11.2",
     "expo-status-bar": "~1.0.4",
@@ -14,11 +16,16 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-native": "~0.63.4",
+    "react-native-animatable": "^1.3.3",
     "react-native-gesture-handler": "~1.10.2",
+    "react-native-magnus": "^1.0.62",
+    "react-native-modal": "^13.0.0",
     "react-native-reanimated": "~2.2.0",
     "react-native-screens": "~3.4.0",
     "react-native-unimodules": "~0.14.5",
-    "react-native-web": "~0.13.12"
+    "react-native-vector-icons": "^8.1.0",
+    "react-native-web": "~0.13.12",
+    "validate-color": "^2.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0"
