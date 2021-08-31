@@ -5,7 +5,13 @@ import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 
 const theme = extendTheme({
   config: {
-    initialColorMode: 'dark'
+    initialColorMode: 'dark',
+    cssVarPrefix: "expenses",
+  },
+  fonts: {
+    body: 'Inter',
+    heading: 'Inter',
+    mono: 'Inter',
   }
 });
 
