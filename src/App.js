@@ -1,6 +1,8 @@
+import { Box } from "@chakra-ui/layout";
+
 function App() {
   return (
-    <div>expenses 💲</div>
+    <Box>expenses 💲</Box>
   );
 }
 
