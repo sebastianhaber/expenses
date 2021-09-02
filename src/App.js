@@ -2,25 +2,31 @@ import { Box } from "@chakra-ui/layout";
 import Nav from "./components/nav/Nav";
 import {BrowserRouter as Router, Switch, Route} from 'react-router-dom'
 import HomePage from "./views/HomePage";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Dashboard from "./views/Dashboard";
 import { createContext } from "react";
 
 const CONTEXT_INIT = {
   user: {},
   colorScheme: 'cyan',
-  setUser: null
+  setUser: null,
+  token: null,
 }
 export const EXPENSES_CONTEXT = createContext(CONTEXT_INIT);
 
 function App() {
   const [user, setUser] = useState(null)
+  const [token, setToken] = useState(null)
+  useEffect(() => {
+    console.log(user);
+  }, [user])
 
   return (
     <EXPENSES_CONTEXT.Provider value={{
       user: user,
       colorScheme: 'cyan',
-      setUser: setUser
+      setUser: setUser,
+      token
     }}>
       <Box pos='relative'>
         <Router>

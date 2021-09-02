@@ -12,21 +12,22 @@ import {
   RadioGroup,
   Stack,
   Radio,
-  Text,
   NumberInput,
   NumberInputField,
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
-  Flex,
   Select,
   FormControl,
   FormLabel,
+  useToast,
 } from "@chakra-ui/react"
 import React, { useContext, useState } from 'react'
 import { EXPENSES_CONTEXT } from "../../App"
 import { useForm } from 'react-hook-form'
 import { useEffect } from "react"
+import { db } from "../../firebase"
+import firebase from '@firebase/app-compat'
 
 const StyledFormLabel = (props) => {
     const { children } = props;
@@ -48,11 +49,38 @@ const FORM_INIT_VALUES = {
 
 export default function AddExpense({isOpen, onClose, btnRef}) {
     const context = useContext(EXPENSES_CONTEXT)
-    const { register, handleSubmit, reset, formState: {isSubmitSuccessful} } = useForm({defaultValues: FORM_INIT_VALUES});
+    const { register, handleSubmit, reset, getValues ,formState: {isSubmitSuccessful} } = useForm({defaultValues: FORM_INIT_VALUES});
     const [isTypeSelected, setSelectedType] = useState(null);
+    const toast = useToast();
+    const [isLoading, setLoading] = useState(false);
 
-    const onSubmit = (data) => {
-        console.log(data);
+    const onSubmit = async () => {
+        setLoading(true);
+        try {
+            const valuesWithTimestamp = {
+                ...getValues(),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }
+            await db.collection('expenses')
+                .doc(context.user.email).collection('activities').add(valuesWithTimestamp);
+            
+            toast({
+                title: `💲 Dodano aktywność!`,
+                description: '',
+                status: 'success',
+                duration: 9000,
+                isClosable: true,
+            })
+        } catch (error) {
+            toast({
+                title: `😶 Coś poszło nie tak...`,
+                description: 'Nie możemy zapisać Twojej aktywności. Spróbuj ponownie.',
+                status: 'error',
+                duration: 9000,
+                isClosable: true,
+            })
+        }
+        setLoading(false);
         onClose();
     }
     const handleSetType = (data) => {
@@ -121,14 +149,14 @@ export default function AddExpense({isOpen, onClose, btnRef}) {
                                         placeholder='Wybierz kategorię'
                                         defaultValue='null'
                                         {...register('category')}>
-                                        <option value="food_drinks">Jedzenie i napoje</option>
-                                        <option value="shopping">Zakupy</option>
-                                        <option value="home">Dom i mieszkanie</option>
-                                        <option value="transport">Transport</option>
-                                        <option value="car">Samochód</option>
-                                        <option value="life">Życie i rozrywka</option>
-                                        <option value="finances">Nakłady finansowe</option>
-                                        <option value="investitions">Inwestycje</option>
+                                        <option value="Jedzenie i napoje">Jedzenie i napoje</option>
+                                        <option value="Zakupy">Zakupy</option>
+                                        <option value="Dom i mieszkanie">Dom i mieszkanie</option>
+                                        <option value="Transport">Transport</option>
+                                        <option value="Samochód">Samochód</option>
+                                        <option value="Życie i rozrywka">Życie i rozrywka</option>
+                                        <option value="Nakłady finansowe">Nakłady finansowe</option>
+                                        <option value="Inwestycje">Inwestycje</option>
                                     </Select>
                                 </FormControl>
                             </Box>
@@ -149,6 +177,7 @@ export default function AddExpense({isOpen, onClose, btnRef}) {
                     <Button
                         type='submit'
                         onClick={handleSubmit(onSubmit)}
+                        isLoading={isLoading}
                         colorScheme={context.colorScheme}>Zapisz</Button>
                 </DrawerFooter>
             </DrawerContent>

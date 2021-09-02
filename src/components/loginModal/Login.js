@@ -1,145 +1,53 @@
 import {
-    Button, Center, FormControl, FormHelperText, FormLabel, Input, Modal, ModalBody, ModalCloseButton,
+    Button, Flex, Modal, ModalBody, ModalCloseButton,
     ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, useToast
-
 } from '@chakra-ui/react'
-import React, { useState } from 'react'
+import React from 'react'
 import { useContext } from 'react';
-import { useForm } from 'react-hook-form';
-import { useHistory } from 'react-router-dom';
 import { EXPENSES_CONTEXT } from '../../App';
 
-const CustomInput = (props) => {
-    const { id, type = 'text', label, placeholder, helperText, register } = props;
-    return (
-        <FormControl id={id} mb='6'>
-            <FormLabel>{ label }</FormLabel>
-            <Input type={type} placeholder={placeholder} {...register(id)} />
-            <FormHelperText>{ helperText }</FormHelperText>
-        </FormControl>
-    )
-}
-
-const LOGIN_INIT = {
-    name: '',
-    email: '',
-    password: '',
-    password_repeat: '',
-}
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { AtSignIcon, ChevronRightIcon } from '@chakra-ui/icons';
+import { db } from '../../firebase';
+import { useState } from 'react';
 
 export default function Login({ isOpen, onClose }) {
-    const [step, setStep] = useState('login');
-    let history = useHistory();
     const context = useContext(EXPENSES_CONTEXT)
-    const { register, handleSubmit, reset, getValues, formState: {isSubmitSuccessful} } = useForm({defaultValues: LOGIN_INIT});
     const toast = useToast();
+    const [isLoading, setLoading] = useState(false);
 
-    const toggleStep = () => {
-        if (step === 'login') setStep('register');
-        else setStep('login');
-        reset({
-            ...getValues(),
-            password: '',
-            password_repeat: ''
-        })
-    }
+    const provider = new GoogleAuthProvider();
+    const auth = getAuth();
 
-    const onSubmit = (data) => {
-        
-        const values = getValues();
-        const renderToast = (description, type) => {
-            toast({
-                title: "Coś poszło nie tak...",
-                description: description,
-                status: type,
-                duration: 9000,
-                isClosable: true,
-            })
-        }
+    const showGoogleSignInButton = () => {
+        setLoading(true);
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                // This gives you a Google Access Token. You can use it to access Google APIs.
+                const credential = GoogleAuthProvider.credentialFromResult(result);
+                const token = credential.accessToken;
+                const user = result.user;
 
-        if (step === 'register') {
-            if (values.name.trim() === '' || values.email.trim() === '' || values.password.trim() === '') {
-                renderToast('Wypełnij wszystkie pola.', 'error');
-                return;
-            }
-            if (values.password === values.password_repeat) {
-                if (values.password.indexOf(' ') > 0) {
-                    renderToast('Hasło nie może zawierać znaków Spacji.', 'error');
-                    return;
-                }
-                console.log('register', data);
-            } else {
-                renderToast('Wygląda na to, że hasła nie są takie same.', 'error');
-                return;
-            }
-        } else {
-            if (values.email.trim() === '' || values.password.trim() === '') {
-                renderToast('Wypełnij wszystkie pola.', 'error');
-                return;
-            }
-            // console.log('login', data);
-            context.setUser({
-                name: 'sebastian',
-                email: values.email,
-                expenses: {}
-            })
-            history.push('/dashboard');
-            onClose();
-        }
-    }
+                db.collection('expenses').doc(user.email).set({
+                    email: user.email,
+                    displayName: user.displayName
+                })
 
-    const LoginTab = () => {
-        return (
-            <>
-                <CustomInput
-                    id='email'
-                    label='E-mail'
-                    type='email'
-                    placeholder='Wpisz swój adres e-mail'
-                    register={register}
-                />
-                <CustomInput
-                    id='password'
-                    label='Hasło'
-                    type='password'
-                    placeholder='••••••••'
-                    register={register}
-                />
-            </>
-        )
-    }
-    const RegisterTab = () => {
-        return (
-            <>
-                <CustomInput
-                    id='name'
-                    label='Imię'
-                    placeholder='Wpisz swoje imię'
-                    register={register}
-                />
-                <CustomInput
-                    id='email'
-                    label='E-mail'
-                    type='email'
-                    placeholder='Wpisz swój adres e-mail'
-                    register={register}
-                    />
-                <CustomInput
-                    id='password'
-                    label='Hasło'
-                    type='password'
-                    placeholder='••••••••'
-                    register={register}
-                    />
-                <CustomInput
-                    id='password_repeat'
-                    label='Powtórz hasło'
-                    type='password'
-                    placeholder='••••••••'
-                    register={register}
-                />
-            </>
-        )
+                context.setUser(user);
+                context.token = token;
+
+                onClose();
+            }).catch((error) => {
+                const errorMessage = error.message;
+                toast({
+                    title: `Coś poszło nie tak...`,
+                    description: errorMessage,
+                    status: 'error',
+                    duration: 9000,
+                    isClosable: true,
+                })
+            });
+        setLoading(false);
     }
 
     return (
@@ -147,41 +55,23 @@ export default function Login({ isOpen, onClose }) {
             <ModalOverlay />
             <ModalContent boxShadow='lg'>
                 <ModalHeader>
-                    {step === 'login' && 'Zaloguj się'}
-                    {step === 'register' && 'Zarejestruj się'}
+                    <Text>Zaloguj się za pomocą:</Text>
                 </ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                    {step === 'login' && <LoginTab />}
-                    {step === 'register' && <RegisterTab />}
-                    <Center mt='6' color='gray'>
-                        <Text mr='2'>
-                            {step === 'login' && 'Nie masz konta?'}
-                            {step === 'register' && 'Masz już konto?'}
-                        </Text>
-                        <Text
-                            transition='color .2s ease'
-                            _hover={
-                                {
-                                    color: 'white',
-                                }
-                            }
-                            onClick={toggleStep}
-                            textDecor='underline'
-                            cursor='pointer'>
-                            {step === 'login' && 'Zarejestruj się'}
-                            {step === 'register' && 'Zaloguj się'}
-                        </Text>
-                    </Center>
+                    <Flex flexDir='column' justifyContent='space-evenly' alignItems='center' >
+                        <Button
+                            isLoading={isLoading}
+                            colorScheme={context.colorScheme}
+                            onClick={() => showGoogleSignInButton()}>
+                            <ChevronRightIcon mr='2' /> Google
+                        </Button>
+                    </Flex>
                 </ModalBody>
 
                 <ModalFooter>
                     <Button colorScheme="cyan" variant='ghost' mr={3} onClick={onClose}>
                         Zamknij
-                    </Button>
-                    <Button colorScheme='cyan' onClick={handleSubmit(onSubmit)}>
-                        {step === 'login' && 'Zaloguj się'}
-                        {step === 'register' && 'Zarejestruj się'}
                     </Button>
                 </ModalFooter>
             </ModalContent>

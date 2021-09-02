@@ -1,5 +1,6 @@
 import { useDisclosure } from '@chakra-ui/hooks'
 import { Box, Flex, Text } from '@chakra-ui/layout'
+import { getAuth, signOut } from 'firebase/auth'
 import React from 'react'
 import { Link, useHistory } from 'react-router-dom'
 import Login from '../loginModal/Login'
@@ -7,9 +8,15 @@ import Login from '../loginModal/Login'
 export default function Nav({user, setUser}) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const history = useHistory()
+    const auth = getAuth();
+
     const handleLogOut = () => {
-        setUser(null);
-        history.push('/');
+        signOut(auth).then(() => {
+            history.push('/');
+            setUser(null);
+        }).catch((error) => {
+            console.log(error);
+        })
     }
     return (
         <Box
