@@ -1,42 +1,91 @@
 import {
     Button, Center, FormControl, FormHelperText, FormLabel, Input, Modal, ModalBody, ModalCloseButton,
-    ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text
+    ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, useToast
 
 } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import { useContext } from 'react';
+import { useForm } from 'react-hook-form';
 import { useHistory } from 'react-router-dom';
 import { EXPENSES_CONTEXT } from '../../App';
 
 const CustomInput = (props) => {
-    const { id, type = 'text', label, placeholder, helperText } = props;
+    const { id, type = 'text', label, placeholder, helperText, register } = props;
     return (
-        <FormControl id={id} {...props}>
+        <FormControl id={id} mb='6'>
             <FormLabel>{ label }</FormLabel>
-            <Input type={type} placeholder={placeholder} />
+            <Input type={type} placeholder={placeholder} {...register(id)} />
             <FormHelperText>{ helperText }</FormHelperText>
         </FormControl>
     )
 }
 
+const LOGIN_INIT = {
+    name: '',
+    email: '',
+    password: '',
+    password_repeat: '',
+}
+
 export default function Login({ isOpen, onClose }) {
-    const [step, setStep] = useState(1);
+    const [step, setStep] = useState('login');
     let history = useHistory();
     const context = useContext(EXPENSES_CONTEXT)
+    const { register, handleSubmit, reset, getValues, formState: {isSubmitSuccessful} } = useForm({defaultValues: LOGIN_INIT});
+    const toast = useToast();
 
     const toggleStep = () => {
-        if (step === 1) setStep(2);
-        else setStep(1);
+        if (step === 'login') setStep('register');
+        else setStep('login');
+        reset({
+            ...getValues(),
+            password: '',
+            password_repeat: ''
+        })
     }
 
-    const handleLogin = () => {
-        context.setUser({
-            name: 'Sebastian',
-            email: 'hvber01@gmail.com',
-            expenses: {}
-        })
-        history.push('/dashboard');
-        onClose();
+    const onSubmit = (data) => {
+        
+        const values = getValues();
+        const renderToast = (description, type) => {
+            toast({
+                title: "Coś poszło nie tak...",
+                description: description,
+                status: type,
+                duration: 9000,
+                isClosable: true,
+            })
+        }
+
+        if (step === 'register') {
+            if (values.name.trim() === '' || values.email.trim() === '' || values.password.trim() === '') {
+                renderToast('Wypełnij wszystkie pola.', 'error');
+                return;
+            }
+            if (values.password === values.password_repeat) {
+                if (values.password.indexOf(' ') > 0) {
+                    renderToast('Hasło nie może zawierać znaków Spacji.', 'error');
+                    return;
+                }
+                console.log('register', data);
+            } else {
+                renderToast('Wygląda na to, że hasła nie są takie same.', 'error');
+                return;
+            }
+        } else {
+            if (values.email.trim() === '' || values.password.trim() === '') {
+                renderToast('Wypełnij wszystkie pola.', 'error');
+                return;
+            }
+            // console.log('login', data);
+            context.setUser({
+                name: 'sebastian',
+                email: values.email,
+                expenses: {}
+            })
+            history.push('/dashboard');
+            onClose();
+        }
     }
 
     const LoginTab = () => {
@@ -47,14 +96,14 @@ export default function Login({ isOpen, onClose }) {
                     label='E-mail'
                     type='email'
                     placeholder='Wpisz swój adres e-mail'
-                    mb='6'
+                    register={register}
                 />
                 <CustomInput
                     id='password'
                     label='Hasło'
                     type='password'
                     placeholder='••••••••'
-                    mb='6'
+                    register={register}
                 />
             </>
         )
@@ -66,28 +115,28 @@ export default function Login({ isOpen, onClose }) {
                     id='name'
                     label='Imię'
                     placeholder='Wpisz swoje imię'
-                    mb='6'
+                    register={register}
                 />
                 <CustomInput
                     id='email'
                     label='E-mail'
                     type='email'
                     placeholder='Wpisz swój adres e-mail'
-                    mb='6'
+                    register={register}
                     />
                 <CustomInput
                     id='password'
                     label='Hasło'
                     type='password'
                     placeholder='••••••••'
-                    mb='6'
+                    register={register}
                     />
                 <CustomInput
                     id='password_repeat'
                     label='Powtórz hasło'
                     type='password'
                     placeholder='••••••••'
-                    mb='6'
+                    register={register}
                 />
             </>
         )
@@ -98,17 +147,17 @@ export default function Login({ isOpen, onClose }) {
             <ModalOverlay />
             <ModalContent boxShadow='lg'>
                 <ModalHeader>
-                    {step === 1 && 'Zaloguj się'}
-                    {step === 2 && 'Zarejestruj się'}
+                    {step === 'login' && 'Zaloguj się'}
+                    {step === 'register' && 'Zarejestruj się'}
                 </ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                    {step === 1 && <LoginTab />}
-                    {step === 2 && <RegisterTab />}
+                    {step === 'login' && <LoginTab />}
+                    {step === 'register' && <RegisterTab />}
                     <Center mt='6' color='gray'>
                         <Text mr='2'>
-                            {step === 1 && 'Nie masz konta?'}
-                            {step === 2 && 'Masz już konto?'}
+                            {step === 'login' && 'Nie masz konta?'}
+                            {step === 'register' && 'Masz już konto?'}
                         </Text>
                         <Text
                             transition='color .2s ease'
@@ -120,8 +169,8 @@ export default function Login({ isOpen, onClose }) {
                             onClick={toggleStep}
                             textDecor='underline'
                             cursor='pointer'>
-                            {step === 1 && 'Zarejestruj się'}
-                            {step === 2 && 'Zaloguj się'}
+                            {step === 'login' && 'Zarejestruj się'}
+                            {step === 'register' && 'Zaloguj się'}
                         </Text>
                     </Center>
                 </ModalBody>
@@ -130,9 +179,9 @@ export default function Login({ isOpen, onClose }) {
                     <Button colorScheme="cyan" variant='ghost' mr={3} onClick={onClose}>
                         Zamknij
                     </Button>
-                    <Button colorScheme='cyan' onClick={handleLogin}>
-                        {step === 1 && 'Zaloguj się'}
-                        {step === 2 && 'Zarejestruj się'}
+                    <Button colorScheme='cyan' onClick={handleSubmit(onSubmit)}>
+                        {step === 'login' && 'Zaloguj się'}
+                        {step === 'register' && 'Zarejestruj się'}
                     </Button>
                 </ModalFooter>
             </ModalContent>

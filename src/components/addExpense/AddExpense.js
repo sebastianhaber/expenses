@@ -19,24 +19,52 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
   Flex,
+  Select,
+  FormControl,
+  FormLabel,
 } from "@chakra-ui/react"
 import React, { useContext, useState } from 'react'
 import { EXPENSES_CONTEXT } from "../../App"
+import { useForm } from 'react-hook-form'
+import { useEffect } from "react"
 
-const StyledHeading = (props) => {
+const StyledFormLabel = (props) => {
     const { children } = props;
     return (
-        <Text {...props}
+        <FormLabel {...props}
             fontWeight='bold'
             fontSize='xl'
             mt='6'
-            mb='2'>{children}</Text>
+            mb='2'>{children}</FormLabel>
     )
+}
+const FORM_INIT_VALUES = {
+    type: null,
+    amount: null,
+    pay_method: null,
+    category: null,
+    note: ''
 }
 
 export default function AddExpense({isOpen, onClose, btnRef}) {
     const context = useContext(EXPENSES_CONTEXT)
-    const [value, setValue] = useState('')
+    const { register, handleSubmit, reset, formState: {isSubmitSuccessful} } = useForm({defaultValues: FORM_INIT_VALUES});
+    const [isTypeSelected, setSelectedType] = useState(null);
+
+    const onSubmit = (data) => {
+        console.log(data);
+        onClose();
+    }
+    const handleSetType = (data) => {
+        setSelectedType(data);
+    }
+
+    useEffect(() => {
+        if (isSubmitSuccessful) {
+            reset(FORM_INIT_VALUES)
+            setSelectedType(null)
+        }
+    }, [isSubmitSuccessful, reset])
 
     return (
         <Drawer
@@ -53,35 +81,64 @@ export default function AddExpense({isOpen, onClose, btnRef}) {
 
                 <DrawerBody>
                     <Box>
-                        <StyledHeading>Typ aktywności</StyledHeading>
-                        <RadioGroup onChange={setValue}>
-                            <Stack direction="row">
-                                <Radio value="expense">Wydatek</Radio>
-                                <Radio value="income">Przychód</Radio>
-                            </Stack>
-                        </RadioGroup>
+                        <FormControl isRequired>
+                            <StyledFormLabel>Typ aktywności</StyledFormLabel>
+                            <RadioGroup onChange={handleSetType}>
+                                <Stack direction="row">
+                                    <Radio value="expense" {...register('type')}>Wydatek</Radio>
+                                    <Radio value="income" {...register('type')}>Przychód</Radio>
+                                </Stack>
+                            </RadioGroup>
+                        </FormControl>
                     </Box>
                     <Box>
-                        <StyledHeading>Wpisz kwotę (w PLN)</StyledHeading>
-                        <NumberInput min={1}>
-                            <NumberInputField />
-                            <NumberInputStepper>
-                            <NumberIncrementStepper />
-                            <NumberDecrementStepper />
-                            </NumberInputStepper>
-                        </NumberInput>
+                        <FormControl isRequired>
+                            <StyledFormLabel>Wpisz kwotę (w PLN)</StyledFormLabel>
+                            <NumberInput min={1}>
+                                <NumberInputField {...register('amount')} />
+                                <NumberInputStepper>
+                                <NumberIncrementStepper />
+                                <NumberDecrementStepper />
+                                </NumberInputStepper>
+                            </NumberInput>
+                        </FormControl>
                     </Box>
+                    {isTypeSelected === 'expense' && (
+                        <>
+                            <Box>
+                                <FormControl isRequired>
+                                    <StyledFormLabel>Płatność</StyledFormLabel>
+                                    <RadioGroup>
+                                        <Radio value="card" {...register('pay_method')} m='2'>Karta</Radio>
+                                        <Radio value="cash" {...register('pay_method')} m='2'>Gotówka</Radio>
+                                    </RadioGroup>
+                                </FormControl>
+                            </Box>
+                            <Box>
+                                <FormControl isRequired>
+                                    <StyledFormLabel>Kategoria</StyledFormLabel>
+                                    <Select
+                                        placeholder='Wybierz kategorię'
+                                        defaultValue='null'
+                                        {...register('category')}>
+                                        <option value="food_drinks">Jedzenie i napoje</option>
+                                        <option value="shopping">Zakupy</option>
+                                        <option value="home">Dom i mieszkanie</option>
+                                        <option value="transport">Transport</option>
+                                        <option value="car">Samochód</option>
+                                        <option value="life">Życie i rozrywka</option>
+                                        <option value="finances">Nakłady finansowe</option>
+                                        <option value="investitions">Inwestycje</option>
+                                    </Select>
+                                </FormControl>
+                            </Box>
+                        </>
+                    )}
                     <Box>
-                        <StyledHeading>Kategoria</StyledHeading>
-                        <Input placeholder='Szukaj kategorii' mb='2' />
-                        <RadioGroup onChange={setValue}>
-                            <Flex flexWrap='wrap'>
-                                <Radio value="ciuchy" m='2'>Ciuchy</Radio>
-                                <Radio value="slodkosci" m='2'>Słodkości</Radio>
-                                <Radio value="fastfood" m='2'>FastFoody</Radio>
-                                <Radio value="prezent" m='2'>Prezenty</Radio>
-                            </Flex>
-                        </RadioGroup>
+                        <FormControl>
+                            <StyledFormLabel>Notatka</StyledFormLabel>
+                            <Input placeholder='Dodaj notatkę...' {...register('note')} />
+                        </FormControl>
                     </Box>
                 </DrawerBody>
 
@@ -89,7 +146,10 @@ export default function AddExpense({isOpen, onClose, btnRef}) {
                     <Button variant="ghost" mr={3} onClick={onClose}>
                         Anuluj
                     </Button>
-                    <Button colorScheme={context.colorScheme}>Zapisz</Button>
+                    <Button
+                        type='submit'
+                        onClick={handleSubmit(onSubmit)}
+                        colorScheme={context.colorScheme}>Zapisz</Button>
                 </DrawerFooter>
             </DrawerContent>
         </Drawer>
