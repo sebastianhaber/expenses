@@ -2,10 +2,14 @@ import {
     Container, Heading, Text, Button,
     Box, useDisclosure, Divider
 } from '@chakra-ui/react'
-import React from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Link } from 'react-scroll'
 import Login from '../components/loginModal/Login'
 import { ChevronRightIcon } from '@chakra-ui/icons'
+import AOS from 'aos'
+import 'aos/dist/aos.css'
+import { EXPENSES_CONTEXT } from '../App'
+import { useHistory } from 'react-router-dom'
 
 export default function HomePage() {
     const { onClose, onOpen, isOpen } = useDisclosure();
@@ -14,6 +18,17 @@ export default function HomePage() {
         heading: ['5xl', '6xl', '8xl', '8xl'],
         subHeading: ['md', 'xl'],
     }
+    const context = useContext(EXPENSES_CONTEXT)
+    const history = useHistory();
+
+    useEffect(() => {
+        AOS.init({
+            duration: 1000
+        });
+    }, []);
+    useEffect(() => {
+        if (context.user) history.push('/dashboard');
+    }, [context.user, history])
 
     return (
         <Box>
@@ -21,6 +36,7 @@ export default function HomePage() {
             <Box
                 pos='relative'
                 top='-20'
+                data-aos='zoom-in'
                 w='100%'
                 h='100vh'>
                 <Container
@@ -65,23 +81,27 @@ export default function HomePage() {
                     <Heading
                         fontSize={fontSize.heading}
                         bgGradient={gradient}
+                        data-aos='fade-down'
                         bgClip='text'>Expenses</Heading>
                     <Text fontSize={fontSize.subHeading}>
                         Wszystko jest w pełni darmowe.
                     </Text>
 
-                    <Divider my='10' />
+                    <Divider my='10' data-aos='zoom-in-right' />
 
-                    <Text fontSize={fontSize.subHeading}>
-                        Zacznij swoją przygodę z Expenses od zalogowania się 💝
-                    </Text>
-                    <Button
-                        mt='10'
-                        fontSize={fontSize.subHeading}
-                        p='6'
-                        borderRadius='xl'
-                        onClick={onOpen}
-                        colorScheme='cyan'>Zaloguj się <ChevronRightIcon ml='2' /></Button>
+                    <Box
+                        data-aos='fade-up'>
+                        <Text fontSize={fontSize.subHeading}>
+                            Zacznij swoją przygodę z Expenses od zalogowania się 💝
+                        </Text>
+                        <Button
+                            mt='10'
+                            fontSize={fontSize.subHeading}
+                            p='6'
+                            borderRadius='xl'
+                            onClick={onOpen}
+                            colorScheme='cyan'>Zaloguj się <ChevronRightIcon ml='2' /></Button>
+                    </Box>
                 </Container>
             </Box>
         </Box>

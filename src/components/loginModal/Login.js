@@ -4,6 +4,9 @@ import {
 
 } from '@chakra-ui/react'
 import React, { useState } from 'react'
+import { useContext } from 'react';
+import { useHistory } from 'react-router-dom';
+import { EXPENSES_CONTEXT } from '../../App';
 
 const CustomInput = (props) => {
     const { id, type = 'text', label, placeholder, helperText } = props;
@@ -18,9 +21,22 @@ const CustomInput = (props) => {
 
 export default function Login({ isOpen, onClose }) {
     const [step, setStep] = useState(1);
+    let history = useHistory();
+    const context = useContext(EXPENSES_CONTEXT)
+
     const toggleStep = () => {
         if (step === 1) setStep(2);
         else setStep(1);
+    }
+
+    const handleLogin = () => {
+        context.setUser({
+            name: 'Sebastian',
+            email: 'hvber01@gmail.com',
+            expenses: {}
+        })
+        history.push('/dashboard');
+        onClose();
     }
 
     const LoginTab = () => {
@@ -114,7 +130,7 @@ export default function Login({ isOpen, onClose }) {
                     <Button colorScheme="cyan" variant='ghost' mr={3} onClick={onClose}>
                         Zamknij
                     </Button>
-                    <Button colorScheme='cyan'>
+                    <Button colorScheme='cyan' onClick={handleLogin}>
                         {step === 1 && 'Zaloguj się'}
                         {step === 2 && 'Zarejestruj się'}
                     </Button>
