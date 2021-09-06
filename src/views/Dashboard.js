@@ -70,7 +70,7 @@ export default function Dashboard() {
         return data.slice(0, limit).map((activity, index) => (
             <Tr key={index}>
                 <Td>{
-                    activity.category === null ? 'Przychód' : activity.category
+                    activity.category === '' ? 'Przychód' : activity.category
                 }</Td>
                 <Td>{activity.note}</Td>
                 <Td isNumeric color={activity.category ? 'red.400' : 'green.400'} fontWeight='bold'>{activity.amount}</Td>

@@ -40,7 +40,7 @@ const StyledFormLabel = (props) => {
     )
 }
 const FORM_INIT_VALUES = {
-    type: null,
+    type: 'income',
     amount: null,
     pay_method: null,
     category: null,

@@ -1,7 +1,7 @@
 import {
     Box, Button, Flex, FormControl, FormLabel, Input, Modal, ModalBody,
-    ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Table,
-    Tbody, Td, Th, Thead, Tr, useDisclosure, useToast
+    ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Select, Table,
+    Tbody, Td, Text, Th, Thead, Tr, useDisclosure, useToast
 } from '@chakra-ui/react';
 import { EditIcon } from '@chakra-ui/icons'
 import React, { useState, useContext } from 'react'
@@ -13,10 +13,11 @@ import { db } from '../firebase';
 export default function AllExpenses() {
     const context = useContext(EXPENSES_CONTEXT)
     const user = context.user;
-    const data = context.data;
+    const [data, setData] = useState(context.data)
     const history = useHistory();
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [values, setValues] = useState({});
+    let searchArray = [];
     const { register, handleSubmit } = useForm();
     const toast = useToast();
     const [isLoading, setLoading] = useState(false);
@@ -79,6 +80,27 @@ export default function AllExpenses() {
         onOpen();
     }
     
+    const handleSearch = (target) => {
+        const value = target.target.value.toLowerCase();
+
+        context.data.map(item => {
+            searchArray = searchArray.filter(element => {
+                return element.category.includes(value) === false;
+            })
+            if ((item.category && item.category.toLowerCase().includes(value)) ||
+                item.note.toLowerCase().includes(value)) {
+                searchArray.push(item)
+                setData(searchArray)
+                return true;
+            }
+            return null;
+        })
+        if (value.trim() === '') {
+            searchArray = [];
+            setData(context.data)
+        }
+    }
+    
     const returnModal = () => {
         return (
             <Modal isOpen={isOpen} onClose={onClose}>
@@ -130,7 +152,7 @@ export default function AllExpenses() {
                     onDoubleClick={() => handleEdit(activity)}
                     userSelect='none'>
                     <Td>{
-                        activity.category === null ? 'Przychód' : activity.category
+                        activity.category === '' ? 'Przychód' : activity.category
                     }</Td>
                     <Td>{activity.note}</Td>
                     <Td>{date.toLocaleDateString()}</Td>
@@ -150,9 +172,17 @@ export default function AllExpenses() {
                 p='2'
                 maxW='200px'
                 w='100%'>
-                <Box>szukanie</Box>
-                <Box>sortowanie</Box>
-                <Box>lista kategorii</Box>
+                <Box>
+                    <Input placeholder='Szukaj...' onChange={target => handleSearch(target)} />
+                </Box>
+                <Flex mt='6' flexDir='column' alignItems='center'>
+                    <Text w='100%'>Sortuj wg</Text>
+                    <Select variant='flushed'>
+                        <option value="date" defaultValue>Data</option>
+                        <option value="category">Kategoria</option>
+                    </Select>
+                    <Button mt='6' colorScheme={ context.colorScheme }>Zatwierdź</Button>
+                </Flex>
             </Flex>
             <Box flex='1' p='2'>
                 {returnModal()}
