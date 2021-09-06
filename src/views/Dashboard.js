@@ -12,10 +12,7 @@ import { Box, Divider, Flex, Heading, Text, Table,
   Spinner,
   useToast,
 } from '@chakra-ui/react';
-import React, { useContext } from 'react'
-import { useEffect } from 'react';
-import { useState } from 'react';
-import { useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react'
 import { Link, useHistory } from 'react-router-dom';
 import { EXPENSES_CONTEXT } from '../App'
 import AddExpense from '../components/addExpense/AddExpense';
@@ -73,7 +70,7 @@ export default function Dashboard() {
                     activity.category === '' ? 'Przychód' : activity.category
                 }</Td>
                 <Td>{activity.note}</Td>
-                <Td isNumeric color={activity.category ? 'red.400' : 'green.400'} fontWeight='bold'>{activity.amount}</Td>
+                <Td isNumeric color={activity.type === 'expense' ? 'red.400' : 'green.400'} fontWeight='bold'>{activity.amount}</Td>
             </Tr>
         ))
     }

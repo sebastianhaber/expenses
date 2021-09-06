@@ -1,14 +1,17 @@
 import { useDisclosure } from '@chakra-ui/hooks'
 import { Box, Flex, Text } from '@chakra-ui/layout'
+import { Button, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverHeader, PopoverTrigger } from '@chakra-ui/react'
 import { getAuth, signOut } from 'firebase/auth'
-import React from 'react'
+import React, { useContext } from 'react'
 import { Link, useHistory } from 'react-router-dom'
+import { EXPENSES_CONTEXT } from '../../App'
 import Login from '../loginModal/Login'
 
 export default function Nav({user, setUser}) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const history = useHistory()
     const auth = getAuth();
+    const context = useContext(EXPENSES_CONTEXT)
 
     const handleLogOut = () => {
         signOut(auth).then(() => {
@@ -34,9 +37,34 @@ export default function Nav({user, setUser}) {
                 maxW='1440px'>
                 <Text as={Link} to={user ? '/dashboard' : '/'} fontWeight='bold' fontSize='xl'>Expenses</Text>
                 {user ? (
-                    <Text
-                        onClick={handleLogOut}
-                        cursor='pointer'>Wyloguj się</Text>
+                    <Popover>
+                        {({ onClose }) => (
+                            <>
+                                <PopoverTrigger>
+                                    <Button variant='ghost'>Wyloguj się</Button>
+                                </PopoverTrigger>
+                                <PopoverContent>
+                                    <PopoverArrow />
+                                    <PopoverCloseButton />
+                                    <PopoverHeader>Wyloguj się</PopoverHeader>
+                                    <PopoverBody>
+                                        <Text mb='6'>Czy na pewno chcesz się wylogować?</Text>
+                                        <Button
+                                            colorScheme={context.colorScheme}
+                                            onClick={onClose}
+                                            mr='6'
+                                            variant='outline'>Anuluj</Button>
+                                        <Button
+                                            colorScheme='red'
+                                            onClick={handleLogOut}>Wyloguj</Button>
+                                    </PopoverBody>
+                                </PopoverContent>
+                            </>
+                        )}
+                    </Popover>
+                    // <Text
+                    //     onClick={handleLogOut}
+                    //     cursor='pointer'>Wyloguj się</Text>
                 ): (
                     <Text onClick={onOpen} cursor='pointer'>Zaloguj się</Text>
                 )}

@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form';
 import { useHistory } from 'react-router-dom';
 import { EXPENSES_CONTEXT } from '../App'
 import { db } from '../firebase';
+import { useEffect } from 'react';
 
 export default function AllExpenses() {
     const context = useContext(EXPENSES_CONTEXT)
@@ -21,6 +22,10 @@ export default function AllExpenses() {
     const { register, handleSubmit } = useForm();
     const toast = useToast();
     const [isLoading, setLoading] = useState(false);
+
+    useEffect(() => {
+        setData(context.data)
+    }, [context.data])
 
     if (!user) {
         history.push('/');
@@ -58,9 +63,11 @@ export default function AllExpenses() {
         try {
             await db.collection('expenses').doc(context.user.email)
                 .collection('activities').doc(values.id).delete()
+            
             onClose();
             setValues({});
         } catch (error) {
+            console.log(error);
             toast({
                 title: `Nie udało się usunąć aktywności 😣`,
                 description: 'Wystąpił błąd uniemożliwiający usunięcie aktywności.',
@@ -156,8 +163,8 @@ export default function AllExpenses() {
                     }</Td>
                     <Td>{activity.note}</Td>
                     <Td>{date.toLocaleDateString()}</Td>
-                    <Td isNumeric color={activity.category ? 'red.400' : 'green.400'} fontWeight='bold'>{activity.amount}</Td>
-                    <Td onClick={() => handleEdit(activity)}>
+                    <Td isNumeric color={activity.type === 'expense' ? 'red.400' : 'green.400'} fontWeight='bold'>{activity.amount}</Td>
+                    <Td onClick={() => handleEdit(activity)} cursor='pointer'>
                         <EditIcon />
                     </Td>
                 </Tr>
@@ -175,14 +182,14 @@ export default function AllExpenses() {
                 <Box>
                     <Input placeholder='Szukaj...' onChange={target => handleSearch(target)} />
                 </Box>
-                <Flex mt='6' flexDir='column' alignItems='center'>
+                {/* <Flex mt='6' flexDir='column' alignItems='center'>
                     <Text w='100%'>Sortuj wg</Text>
                     <Select variant='flushed'>
                         <option value="date" defaultValue>Data</option>
                         <option value="category">Kategoria</option>
                     </Select>
                     <Button mt='6' colorScheme={ context.colorScheme }>Zatwierdź</Button>
-                </Flex>
+                </Flex> */}
             </Flex>
             <Box flex='1' p='2'>
                 {returnModal()}

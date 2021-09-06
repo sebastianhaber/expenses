@@ -11,7 +11,6 @@ const CONTEXT_INIT = {
   user: {},
   colorScheme: 'cyan',
   setUser: null,
-  token: null,
   data: [],
   setData: ()=>{}
 }
@@ -20,17 +19,12 @@ export const EXPENSES_CONTEXT = createContext(CONTEXT_INIT);
 function App() {
   const [user, setUser] = useState(null)
   const [data, setData] = useState([])
-  const [token, setToken] = useState(null)
-  useEffect(() => {
-    console.log(user);
-  }, [user])
 
   return (
     <EXPENSES_CONTEXT.Provider value={{
       user: user,
       colorScheme: 'cyan',
       setUser: setUser,
-      token,
       data,
       setData,
     }}>

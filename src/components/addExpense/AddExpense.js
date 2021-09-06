@@ -40,7 +40,7 @@ const StyledFormLabel = (props) => {
     )
 }
 const FORM_INIT_VALUES = {
-    type: 'income',
+    type: null,
     amount: null,
     pay_method: null,
     category: null,
@@ -49,7 +49,7 @@ const FORM_INIT_VALUES = {
 
 export default function AddExpense({isOpen, onClose, btnRef}) {
     const context = useContext(EXPENSES_CONTEXT)
-    const { register, handleSubmit, reset, getValues ,formState: {isSubmitSuccessful} } = useForm({defaultValues: FORM_INIT_VALUES});
+    const { register, handleSubmit, reset, getValues, setValue, formState: {isSubmitSuccessful} } = useForm({defaultValues: FORM_INIT_VALUES});
     const [isTypeSelected, setSelectedType] = useState(null);
     const toast = useToast();
     const [isLoading, setLoading] = useState(false);
@@ -73,7 +73,6 @@ export default function AddExpense({isOpen, onClose, btnRef}) {
                 isClosable: true,
             })
         } catch (error) {
-            console.log(error);
             toast({
                 title: `😶 Coś poszło nie tak...`,
                 description: 'Nie możemy zapisać Twojej aktywności. Spróbuj ponownie.',
@@ -87,6 +86,9 @@ export default function AddExpense({isOpen, onClose, btnRef}) {
     }
     const handleSetType = (data) => {
         setSelectedType(data);
+        if (data === 'income') {
+            setValue('category', 'Przychód')
+        }
     }
 
     useEffect(() => {
