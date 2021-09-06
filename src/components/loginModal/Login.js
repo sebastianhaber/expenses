@@ -7,7 +7,7 @@ import { useContext } from 'react';
 import { EXPENSES_CONTEXT } from '../../App';
 
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { AtSignIcon, ChevronRightIcon } from '@chakra-ui/icons';
+import { ChevronRightIcon } from '@chakra-ui/icons';
 import { db } from '../../firebase';
 import { useState } from 'react';
 

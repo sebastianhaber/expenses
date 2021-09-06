@@ -16,7 +16,7 @@ import React, { useContext } from 'react'
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { useRef } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { EXPENSES_CONTEXT } from '../App'
 import AddExpense from '../components/addExpense/AddExpense';
 import { db } from '../firebase';
@@ -28,7 +28,8 @@ export default function Dashboard() {
 
     const { isOpen, onClose, onOpen } = useDisclosure();
     const btnRef = useRef();
-    const [data, setData] = useState([]);
+    const setData = context.setData;
+    const data = context.data;
 
     const docRef = db.collection('expenses').doc(user?.email).collection('activities');
     const toast = useToast();
@@ -61,6 +62,20 @@ export default function Dashboard() {
         let year = date.getFullYear();
 
         return `${day}/${month}/${year}`;
+    }
+
+    const tableValues = () => {
+        const limit = 3;
+        
+        return data.slice(0, limit).map((activity, index) => (
+            <Tr key={index}>
+                <Td>{
+                    activity.category === null ? 'Przychód' : activity.category
+                }</Td>
+                <Td>{activity.note}</Td>
+                <Td isNumeric color={activity.category ? 'red.400' : 'green.400'} fontWeight='bold'>{activity.amount}</Td>
+            </Tr>
+        ))
     }
 
     if (!data) {
@@ -140,7 +155,7 @@ export default function Dashboard() {
                         justifyContent='space-between'
                         alignItems='center'>
                         <Heading fontSize={['xl', 'xl', '4xl']}>Ostatnie wydatki</Heading>
-                        <Text cursor='pointer'>Sprawdź wszystkie <ArrowRightIcon fontSize='xs' /></Text>
+                        <Text as={Link} to='/dashboard/all-expenses' cursor='pointer'>Sprawdź wszystkie <ArrowRightIcon fontSize='xs' /></Text>
                     </Flex>
                     <Table variant="simple" mt='6'>
                         <Thead>
@@ -152,15 +167,7 @@ export default function Dashboard() {
                         </Thead>
                         <Tbody>
                             {
-                                data.map((activity, index) => (
-                                    <Tr key={index}>
-                                        <Td>{
-                                            activity.category === null ? 'Przychód' : activity.category
-                                        }</Td>
-                                        <Td>{activity.note}</Td>
-                                        <Td isNumeric color={activity.category ? 'red.400' : 'green.400'} fontWeight='bold'>{activity.amount}</Td>
-                                    </Tr>
-                                ))
+                                tableValues()
                             }
                         </Tbody>
                     </Table>

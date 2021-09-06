@@ -5,17 +5,21 @@ import HomePage from "./views/HomePage";
 import { useEffect, useState } from "react";
 import Dashboard from "./views/Dashboard";
 import { createContext } from "react";
+import AllExpenses from "./views/AllExpenses";
 
 const CONTEXT_INIT = {
   user: {},
   colorScheme: 'cyan',
   setUser: null,
   token: null,
+  data: [],
+  setData: ()=>{}
 }
 export const EXPENSES_CONTEXT = createContext(CONTEXT_INIT);
 
 function App() {
   const [user, setUser] = useState(null)
+  const [data, setData] = useState([])
   const [token, setToken] = useState(null)
   useEffect(() => {
     console.log(user);
@@ -26,7 +30,9 @@ function App() {
       user: user,
       colorScheme: 'cyan',
       setUser: setUser,
-      token
+      token,
+      data,
+      setData,
     }}>
       <Box pos='relative'>
         <Router>
@@ -37,6 +43,9 @@ function App() {
             </Route>
             <Route exact path='/dashboard'>
               <Dashboard setUser={setUser} user={user} />
+            </Route>
+            <Route exact path='/dashboard/all-expenses'>
+              <AllExpenses />
             </Route>
             <Route>
               404

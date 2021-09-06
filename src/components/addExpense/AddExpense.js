@@ -57,12 +57,13 @@ export default function AddExpense({isOpen, onClose, btnRef}) {
     const onSubmit = async () => {
         setLoading(true);
         try {
+            const docRef = db.collection('expenses').doc(context.user.email).collection('activities').doc()
             const valuesWithTimestamp = {
                 ...getValues(),
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                id: docRef.id
             }
-            await db.collection('expenses')
-                .doc(context.user.email).collection('activities').add(valuesWithTimestamp);
+            await docRef.set(valuesWithTimestamp);
             
             toast({
                 title: `💲 Dodano aktywność!`,
@@ -72,6 +73,7 @@ export default function AddExpense({isOpen, onClose, btnRef}) {
                 isClosable: true,
             })
         } catch (error) {
+            console.log(error);
             toast({
                 title: `😶 Coś poszło nie tak...`,
                 description: 'Nie możemy zapisać Twojej aktywności. Spróbuj ponownie.',
@@ -102,85 +104,86 @@ export default function AddExpense({isOpen, onClose, btnRef}) {
             finalFocusRef={btnRef}
             size='lg'
         >
-            <DrawerOverlay />
-            <DrawerContent>
-                <DrawerCloseButton />
-                <DrawerHeader>Dodaj aktywność 💲</DrawerHeader>
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <DrawerOverlay />
+                <DrawerContent>
+                    <DrawerCloseButton />
+                    <DrawerHeader>Dodaj aktywność 💲</DrawerHeader>
 
-                <DrawerBody>
-                    <Box>
-                        <FormControl isRequired>
-                            <StyledFormLabel>Typ aktywności</StyledFormLabel>
-                            <RadioGroup onChange={handleSetType}>
-                                <Stack direction="row">
-                                    <Radio value="expense" {...register('type')}>Wydatek</Radio>
-                                    <Radio value="income" {...register('type')}>Przychód</Radio>
-                                </Stack>
-                            </RadioGroup>
-                        </FormControl>
-                    </Box>
-                    <Box>
-                        <FormControl isRequired>
-                            <StyledFormLabel>Wpisz kwotę (w PLN)</StyledFormLabel>
-                            <NumberInput min={1}>
-                                <NumberInputField {...register('amount')} />
-                                <NumberInputStepper>
-                                <NumberIncrementStepper />
-                                <NumberDecrementStepper />
-                                </NumberInputStepper>
-                            </NumberInput>
-                        </FormControl>
-                    </Box>
-                    {isTypeSelected === 'expense' && (
-                        <>
-                            <Box>
-                                <FormControl isRequired>
-                                    <StyledFormLabel>Płatność</StyledFormLabel>
-                                    <RadioGroup>
-                                        <Radio value="card" {...register('pay_method')} m='2'>Karta</Radio>
-                                        <Radio value="cash" {...register('pay_method')} m='2'>Gotówka</Radio>
-                                    </RadioGroup>
-                                </FormControl>
-                            </Box>
-                            <Box>
-                                <FormControl isRequired>
-                                    <StyledFormLabel>Kategoria</StyledFormLabel>
-                                    <Select
-                                        placeholder='Wybierz kategorię'
-                                        defaultValue='null'
-                                        {...register('category')}>
-                                        <option value="Jedzenie i napoje">Jedzenie i napoje</option>
-                                        <option value="Zakupy">Zakupy</option>
-                                        <option value="Dom i mieszkanie">Dom i mieszkanie</option>
-                                        <option value="Transport">Transport</option>
-                                        <option value="Samochód">Samochód</option>
-                                        <option value="Życie i rozrywka">Życie i rozrywka</option>
-                                        <option value="Nakłady finansowe">Nakłady finansowe</option>
-                                        <option value="Inwestycje">Inwestycje</option>
-                                    </Select>
-                                </FormControl>
-                            </Box>
-                        </>
-                    )}
-                    <Box>
-                        <FormControl>
-                            <StyledFormLabel>Notatka</StyledFormLabel>
-                            <Input placeholder='Dodaj notatkę...' {...register('note')} />
-                        </FormControl>
-                    </Box>
-                </DrawerBody>
+                    <DrawerBody>
+                        <Box>
+                            <FormControl isRequired>
+                                <StyledFormLabel>Typ aktywności</StyledFormLabel>
+                                <RadioGroup onChange={handleSetType}>
+                                    <Stack direction="row">
+                                        <Radio value="expense" {...register('type')}>Wydatek</Radio>
+                                        <Radio value="income" {...register('type')}>Przychód</Radio>
+                                    </Stack>
+                                </RadioGroup>
+                            </FormControl>
+                        </Box>
+                        <Box>
+                            <FormControl isRequired>
+                                <StyledFormLabel>Wpisz kwotę (w PLN)</StyledFormLabel>
+                                <NumberInput min={1}>
+                                    <NumberInputField {...register('amount')} />
+                                    <NumberInputStepper>
+                                    <NumberIncrementStepper />
+                                    <NumberDecrementStepper />
+                                    </NumberInputStepper>
+                                </NumberInput>
+                            </FormControl>
+                        </Box>
+                        {isTypeSelected === 'expense' && (
+                            <>
+                                <Box>
+                                    <FormControl isRequired>
+                                        <StyledFormLabel>Płatność</StyledFormLabel>
+                                        <RadioGroup>
+                                            <Radio value="card" {...register('pay_method')} m='2'>Karta</Radio>
+                                            <Radio value="cash" {...register('pay_method')} m='2'>Gotówka</Radio>
+                                        </RadioGroup>
+                                    </FormControl>
+                                </Box>
+                                <Box>
+                                    <FormControl isRequired>
+                                        <StyledFormLabel>Kategoria</StyledFormLabel>
+                                        <Select
+                                            placeholder='Wybierz kategorię'
+                                            defaultValue='null'
+                                            {...register('category')}>
+                                            <option value="Jedzenie i napoje">Jedzenie i napoje</option>
+                                            <option value="Zakupy">Zakupy</option>
+                                            <option value="Dom i mieszkanie">Dom i mieszkanie</option>
+                                            <option value="Transport">Transport</option>
+                                            <option value="Samochód">Samochód</option>
+                                            <option value="Życie i rozrywka">Życie i rozrywka</option>
+                                            <option value="Nakłady finansowe">Nakłady finansowe</option>
+                                            <option value="Inwestycje">Inwestycje</option>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+                            </>
+                        )}
+                        <Box>
+                            <FormControl isRequired>
+                                <StyledFormLabel>Notatka</StyledFormLabel>
+                                <Input placeholder='Dodaj notatkę...' {...register('note')} />
+                            </FormControl>
+                        </Box>
+                    </DrawerBody>
 
-                <DrawerFooter>
-                    <Button variant="ghost" mr={3} onClick={onClose}>
-                        Anuluj
-                    </Button>
-                    <Button
-                        type='submit'
-                        onClick={handleSubmit(onSubmit)}
-                        isLoading={isLoading}
-                        colorScheme={context.colorScheme}>Zapisz</Button>
-                </DrawerFooter>
-            </DrawerContent>
+                    <DrawerFooter>
+                        <Button variant="ghost" mr={3} onClick={onClose}>
+                            Anuluj
+                        </Button>
+                        <Button
+                            type='submit'
+                            isLoading={isLoading}
+                            colorScheme={context.colorScheme}>Zapisz</Button>
+                    </DrawerFooter>
+                </DrawerContent>
+            </form>
         </Drawer>
     )
 }
