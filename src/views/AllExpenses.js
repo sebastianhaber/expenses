@@ -1,7 +1,7 @@
 import {
     Box, Button, Flex, FormControl, FormLabel, Input, Modal, ModalBody,
-    ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Select, Table,
-    Tbody, Td, Text, Th, Thead, Tr, useDisclosure, useToast
+    ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Table,
+    Tbody, Td, Th, Thead, Tr, useDisclosure, useToast
 } from '@chakra-ui/react';
 import { EditIcon } from '@chakra-ui/icons'
 import React, { useState, useContext } from 'react'
@@ -173,7 +173,7 @@ export default function AllExpenses() {
     }
 
     return (
-        <Flex flexDir={['column', 'row', 'row']}>
+        <Flex flexDir={['column', 'column', 'row']}>
             <Flex
                 flexDir='column'
                 p='2'
@@ -191,7 +191,7 @@ export default function AllExpenses() {
                     <Button mt='6' colorScheme={ context.colorScheme }>Zatwierdź</Button>
                 </Flex> */}
             </Flex>
-            <Box flex='1' p='2'>
+            <Box flex='1' p='2' overflowX='auto'>
                 {returnModal()}
                 <Table variant="striped" mt='6'>
                     <Thead>

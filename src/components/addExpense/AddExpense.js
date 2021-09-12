@@ -128,7 +128,7 @@ export default function AddExpense({isOpen, onClose, btnRef}) {
                             <FormControl isRequired>
                                 <StyledFormLabel>Wpisz kwotę (w PLN)</StyledFormLabel>
                                 <NumberInput min={1}>
-                                    <NumberInputField {...register('amount')} />
+                                    <NumberInputField {...register('amount', {valueAsNumber: true})} />
                                     <NumberInputStepper>
                                     <NumberIncrementStepper />
                                     <NumberDecrementStepper />

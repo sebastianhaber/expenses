@@ -13,6 +13,7 @@ import { Box, Divider, Flex, Heading, Text, Table,
   useToast,
 } from '@chakra-ui/react';
 import React, { useContext, useEffect, useRef } from 'react'
+import { useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { EXPENSES_CONTEXT } from '../App'
 import AddExpense from '../components/addExpense/AddExpense';
@@ -27,6 +28,10 @@ export default function Dashboard() {
     const btnRef = useRef();
     const setData = context.setData;
     const data = context.data;
+    const [values, setValues] = useState({
+        expense: 0,
+        income: 0
+    })
 
     const docRef = db.collection('expenses').doc(user?.email).collection('activities');
     const toast = useToast();
@@ -35,6 +40,23 @@ export default function Dashboard() {
         try {
             docRef.orderBy('timestamp', 'desc').onSnapshot(snapshot => {
                 const data = snapshot.docs.map(doc => doc.data())
+
+                data.map(item => {
+                    if (item.type === 'income') {
+                        setValues(prevState => ({
+                            ...prevState,
+                            income: prevState.income + item.amount
+                        }))
+                    }
+                    if (item.type === 'expense') {
+                        setValues(prevState => ({
+                            ...prevState,
+                            expense: prevState.expense + item.amount
+                        }))
+                    }
+                    return true;
+                })
+
                 setData(data)
             })
         } catch (error) {
@@ -134,11 +156,11 @@ export default function Dashboard() {
                     <Flex my='10' fontWeight='bold' justifyContent='space-between'>
                         <Flex>
                             <Text mr='2'>Wydatki: </Text>
-                            <Text color='green.400'>{ user?.expenses?.total || 0 } PLN</Text>
+                            <Text color='red.400'>{ values.expense.toFixed() } PLN</Text>
                         </Flex>
                         <Flex>
                             <Text mr='2'>Zarobki: </Text>
-                            <Text color='green.400'>{ user?.incomes?.total || 0 } PLN</Text>
+                            <Text color='green.400'>{ values.income.toFixed() } PLN</Text>
                         </Flex>
                     </Flex>
                     <Divider />

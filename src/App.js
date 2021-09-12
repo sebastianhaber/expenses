@@ -2,7 +2,7 @@ import { Box } from "@chakra-ui/layout";
 import Nav from "./components/nav/Nav";
 import {BrowserRouter as Router, Switch, Route} from 'react-router-dom'
 import HomePage from "./views/HomePage";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Dashboard from "./views/Dashboard";
 import { createContext } from "react";
 import AllExpenses from "./views/AllExpenses";
@@ -29,7 +29,7 @@ function App() {
       setData,
     }}>
       <Box pos='relative'>
-        <Router>
+        <Router basename='/expenses'>
           <Nav user={user} setUser={setUser} />
           <Switch>
             <Route exact path='/'>
